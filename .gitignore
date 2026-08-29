@@ -1,0 +1,26 @@
+# Environment variables and API secrets
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# SQLite runtime database files
+*.db
+*.db-shm
+*.db-wal
+
+# Jupyter / Colab
+.ipynb_checkpoints/
+
+# Editor and operating-system files
+.vscode/
+.DS_Store
+Thumbs.db
