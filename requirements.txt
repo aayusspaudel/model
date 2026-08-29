@@ -1,0 +1,15 @@
+streamlit
+langchain-core
+langchain
+langchain-huggingface
+langchain-text-splitters
+langchain-community
+langchain-openai
+langgraph
+langgraph-checkpoint-postgres
+psycopg[binary]
+pypdf
+faiss-cpu
+duckduckgo-search
+python-dotenv
+requests
