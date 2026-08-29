@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import os
-import sqlite3
+
 import tempfile
 from typing import Annotated, Any, Dict, Optional, TypedDict
-
+import psycopg
+from psycopg.rows import dict_row
+from langgraph.checkpoint.postgres import PostgresSaver
 from dotenv import load_dotenv
 from langchain_huggingface import ChatHuggingFace, HuggingFaceEndpoint
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -14,7 +16,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_core.messages import BaseMessage, SystemMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
@@ -24,6 +26,31 @@ load_dotenv()
 
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+
+
+SUPABASE_DB_HOST = os.getenv("SUPABASE_DB_HOST")
+SUPABASE_DB_PORT = os.getenv("SUPABASE_DB_PORT", "5432")
+SUPABASE_DB_NAME = os.getenv("SUPABASE_DB_NAME", "postgres")
+SUPABASE_DB_USER = os.getenv("SUPABASE_DB_USER", "postgres")
+SUPABASE_DB_PASSWORD = os.getenv("SUPABASE_DB_PASSWORD")
+
+if not SUPABASE_DB_PASSWORD:
+    raise ValueError("SUPABASE_DB_PASSWORD is not set.")
+
+conn = psycopg.connect(
+    host=SUPABASE_DB_HOST,
+    port=SUPABASE_DB_PORT,
+    dbname=SUPABASE_DB_NAME,
+    user=SUPABASE_DB_USER,
+    password=SUPABASE_DB_PASSWORD,
+    autocommit=True,
+    row_factory=dict_row,
+)
+
+checkpointer = PostgresSaver(conn)
+
+checkpointer.setup()
+
 
 # -------------------
 # 1. LLM + embeddings
@@ -222,8 +249,10 @@ tool_node = ToolNode(tools)
 # -------------------
 # 6. Checkpointer
 # -------------------
-conn = sqlite3.connect(database="chatbot.db", check_same_thread=False)
-checkpointer = SqliteSaver(conn=conn)
+
+
+
+
 
 # -------------------
 # 7. Graph
