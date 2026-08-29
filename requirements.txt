@@ -13,3 +13,4 @@ faiss-cpu
 duckduckgo-search
 python-dotenv
 requests
+ddgs
