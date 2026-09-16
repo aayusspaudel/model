@@ -28,7 +28,39 @@ HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
 
+# -------------------
+# Supabase PostgreSQL
+# -------------------
+
+SUPABASE_DB_HOST = os.getenv("SUPABASE_DB_HOST")
+SUPABASE_DB_PORT = os.getenv("SUPABASE_DB_PORT", "5432")
+SUPABASE_DB_NAME = os.getenv("SUPABASE_DB_NAME", "postgres")
+SUPABASE_DB_USER = os.getenv("SUPABASE_DB_USER")
+SUPABASE_DB_PASSWORD = os.getenv("SUPABASE_DB_PASSWORD")
+
+
+required_db_vars = {
+    "SUPABASE_DB_HOST": SUPABASE_DB_HOST,
+    "SUPABASE_DB_PORT": SUPABASE_DB_PORT,
+    "SUPABASE_DB_NAME": SUPABASE_DB_NAME,
+    "SUPABASE_DB_USER": SUPABASE_DB_USER,
+    "SUPABASE_DB_PASSWORD": SUPABASE_DB_PASSWORD,
+}
+
+missing_db_vars = [
+    name for name, value in required_db_vars.items()
+    if not value
+]
+
+if missing_db_vars:
+    raise ValueError(
+        "Missing Supabase database environment variables: "
+        + ", ".join(missing_db_vars)
+    )
+
+
 from psycopg_pool import ConnectionPool
+
 
 DB_POOL = ConnectionPool(
     conninfo=(
@@ -43,20 +75,12 @@ DB_POOL = ConnectionPool(
     timeout=30,
 )
 
-if not SUPABASE_DB_PASSWORD:
-    raise ValueError("SUPABASE_DB_PASSWORD is not set.")
 
-conn = psycopg.connect(
-    host=SUPABASE_DB_HOST,
-    port=SUPABASE_DB_PORT,
-    dbname=SUPABASE_DB_NAME,
-    user=SUPABASE_DB_USER,
-    password=SUPABASE_DB_PASSWORD,
-    autocommit=True,
-    row_factory=dict_row,
-)
+# IMPORTANT:
+# Pass the pool to LangGraph instead of creating
+# one permanent psycopg connection.
 
-checkpointer = PostgresSaver(conn)
+checkpointer = PostgresSaver(DB_POOL)
 
 checkpointer.setup()
 
