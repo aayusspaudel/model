@@ -25,6 +25,8 @@ load_dotenv()
 
 HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+ALPHAVANTAGE_API_KEY = os.getenv("ALPHAVANTAGE_API_KEY")
+# OPENWEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY")
 
 
 # -------------------
@@ -203,18 +205,25 @@ def calculator(first_num: float, second_num: float, operation: str) -> dict:
         return {"error": str(e)}
 
 
+
 @tool
 def get_stock_price(symbol: str) -> dict:
-    """
-    Fetch latest stock price for a given symbol (e.g. 'AAPL', 'TSLA') 
-    using Alpha Vantage with API key in the URL.
-    """
+    """Fetch the latest stock price."""
+
+    if not ALPHAVANTAGE_API_KEY:
+        return {"error": "Alpha Vantage API key is not configured."}
+
     url = (
         "https://www.alphavantage.co/query"
-        f"?function=GLOBAL_QUOTE&symbol={symbol}&apikey=C9PE94QUEW9VWGFM"
+        f"?function=GLOBAL_QUOTE"
+        f"&symbol={symbol}"
+        f"&apikey={ALPHAVANTAGE_API_KEY}"
     )
-    r = requests.get(url)
-    return r.json()
+
+    response = requests.get(url, timeout=15)
+    response.raise_for_status()
+
+    return response.json()
 
 
 @tool
