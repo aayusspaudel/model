@@ -54,7 +54,7 @@ threads = st.session_state["chat_threads"][::-1]
 selected_thread = None
 
 # ============================ Sidebar ============================
-st.sidebar.title("ChutGPT+")
+st.sidebar.title("ChatGPT+")
 st.sidebar.markdown(f"**Thread ID:** `{thread_key}`")
 
 if st.sidebar.button("New Chat", use_container_width=True):
@@ -93,7 +93,7 @@ else:
             selected_thread = thread_id
 
 # ============================ Main Layout ========================
-st.title("Multi Utility Chutbot")
+st.title("Multi Utility Chatbot")
 
 # Chat area
 for message in st.session_state["message_history"]:
