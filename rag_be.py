@@ -28,11 +28,20 @@ HF_TOKEN = os.getenv("HUGGINGFACEHUB_API_TOKEN")
 openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
 
-SUPABASE_DB_HOST = os.getenv("SUPABASE_DB_HOST")
-SUPABASE_DB_PORT = os.getenv("SUPABASE_DB_PORT", "5432")
-SUPABASE_DB_NAME = os.getenv("SUPABASE_DB_NAME", "postgres")
-SUPABASE_DB_USER = os.getenv("SUPABASE_DB_USER", "postgres")
-SUPABASE_DB_PASSWORD = os.getenv("SUPABASE_DB_PASSWORD")
+from psycopg_pool import ConnectionPool
+
+DB_POOL = ConnectionPool(
+    conninfo=(
+        f"host={SUPABASE_DB_HOST} "
+        f"port={SUPABASE_DB_PORT} "
+        f"dbname={SUPABASE_DB_NAME} "
+        f"user={SUPABASE_DB_USER} "
+        f"password={SUPABASE_DB_PASSWORD}"
+    ),
+    min_size=1,
+    max_size=5,
+    timeout=30,
+)
 
 if not SUPABASE_DB_PASSWORD:
     raise ValueError("SUPABASE_DB_PASSWORD is not set.")
